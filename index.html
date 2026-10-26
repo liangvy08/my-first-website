@@ -1,107 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="StudyFlow 个人学习进度管理">
-  <title>StudyFlow · 学习进度管理</title>
-  <style>
-    :root { --ink:#172033; --muted:#667085; --line:#e4e8f0; --surface:#fff; --bg:#f5f7fb; --primary:#5566f5; --primary-dark:#4051d7; --success:#20a875; --success-soft:#dff7ec; --pending:#eef1f5; --danger:#d6455d; --shadow:0 14px 35px rgba(31,45,81,.08); }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
-    button, input { font:inherit; }
-    button { cursor:pointer; }
-    .app-shell { max-width:1180px; margin:0 auto; padding:34px 22px 56px; }
-    .topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:28px; }
-    .brand { display:flex; align-items:center; gap:13px; }
-    .brand-mark { display:grid; place-items:center; width:43px; height:43px; border-radius:13px; color:#fff; font-weight:800; font-size:20px; background:linear-gradient(135deg,#6475ff,#8a78f3); box-shadow:0 8px 18px rgba(85,102,245,.25); }
-    h1, h2, p { margin:0; } h1 { font-size:24px; letter-spacing:-.02em; } .subtitle { margin-top:4px; color:var(--muted); font-size:14px; }
-    .layout { display:grid; grid-template-columns:250px minmax(0,1fr); gap:22px; align-items:start; }
-    .card { background:var(--surface); border:1px solid rgba(228,232,240,.8); border-radius:18px; box-shadow:var(--shadow); }
-    .projects-card { padding:17px 13px 13px; position:sticky; top:20px; }
-    .section-heading { display:flex; align-items:center; justify-content:space-between; padding:0 7px 12px; } .section-heading h2 { font-size:14px; }
-    .count { color:var(--muted); font-size:12px; }
-    .project-list { display:grid; gap:6px; }
-    .project-item { width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid transparent; border-radius:11px; padding:11px 10px; color:var(--ink); background:transparent; text-align:left; transition:.18s ease; }
-    .project-item:hover { background:#f4f6ff; } .project-item.active { color:var(--primary-dark); background:#eef0ff; border-color:#dce0ff; }
-    .project-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; font-size:14px; } .project-pages { flex:none; color:var(--muted); font-size:12px; }
-    .add-button { width:100%; margin-top:12px; border:1px dashed #c8cde0; border-radius:11px; padding:10px; color:var(--primary-dark); background:transparent; font-weight:600; transition:.18s ease; } .add-button:hover { border-color:var(--primary); background:#f7f8ff; }
-    .content { min-width:0; }
-    .hero-card { padding:27px 29px 22px; }
-    .project-header { display:flex; justify-content:space-between; align-items:flex-start; gap:15px; } .eyebrow { margin-bottom:7px; color:var(--primary); font-size:12px; font-weight:700; letter-spacing:.08em; } .project-title { font-size:26px; letter-spacing:-.03em; } .project-subtitle { margin-top:7px; color:var(--muted); font-size:14px; }
-    .delete-button { border:0; border-radius:9px; padding:8px 11px; color:var(--danger); background:#fff2f4; font-size:13px; } .delete-button:hover { background:#ffe4e9; }
-    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:27px; } .stat { padding:15px 16px; border:1px solid var(--line); border-radius:13px; background:#fbfcfe; } .stat-label { color:var(--muted); font-size:12px; } .stat-value { margin-top:5px; font-size:24px; font-weight:750; } .stat-value small { color:var(--muted); font-size:13px; font-weight:500; }
-    .progress-wrap { margin-top:21px; } .progress-label { display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:var(--muted); } .progress-label strong { color:var(--ink); } .progress-track { height:10px; overflow:hidden; border-radius:999px; background:#edf0f5; } .progress-fill { height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,#5566f5,#7c83ff); transition:width .25s ease; }
-    .grid-card { margin-top:18px; padding:22px 29px 29px; } .grid-header { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px; } .grid-header h2 { font-size:17px; } .grid-help { color:var(--muted); font-size:12px; }
-    .page-grid { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:8px; }
-    .page-cell { aspect-ratio:1; min-width:0; border:1px solid #e3e7ed; border-radius:9px; color:#7b8495; background:var(--pending); font-size:13px; font-weight:650; transition:transform .15s ease,background .2s ease,box-shadow .2s ease; } .page-cell:hover { transform:translateY(-2px); box-shadow:0 5px 12px rgba(31,45,81,.1); } .page-cell.done { border-color:var(--success); color:#fff; background:var(--success); }
-    .empty-state { padding:30px 10px; color:var(--muted); text-align:center; }
-    dialog { width:min(420px,calc(100% - 32px)); border:0; border-radius:18px; padding:0; color:var(--ink); box-shadow:0 24px 70px rgba(20,29,55,.25); } dialog::backdrop { background:rgba(19,28,51,.45); } .modal { padding:24px; } .modal h2 { font-size:19px; } .modal p { margin-top:7px; color:var(--muted); font-size:13px; } .form-row { margin-top:18px; } label { display:block; margin-bottom:7px; font-size:13px; font-weight:650; } input { width:100%; border:1px solid #d9deea; border-radius:10px; padding:11px 12px; outline:none; } input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(85,102,245,.12); } .modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:22px; } .modal-actions button { border:0; border-radius:9px; padding:10px 15px; font-weight:650; } .cancel-button { color:var(--muted); background:#eef1f5; } .primary-button { color:#fff; background:var(--primary); } .primary-button:hover { background:var(--primary-dark); }
-    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    @media (max-width:760px) { .app-shell { padding:22px 14px 40px; } .topbar { margin-bottom:20px; } .layout { display:block; } .projects-card { position:static; margin-bottom:14px; } .project-list { display:flex; overflow:auto; padding-bottom:2px; } .project-item { flex:0 0 auto; width:auto; min-width:145px; } .add-button { margin-top:12px; } .hero-card, .grid-card { padding:21px 16px; } .project-title { font-size:22px; } .stats { gap:8px; margin-top:21px; } .stat { padding:12px 10px; } .stat-value { font-size:20px; } .grid-card { margin-top:13px; } .page-grid { gap:5px; } .page-cell { border-radius:6px; font-size:11px; } }
-    @media (max-width:380px) { .stats { grid-template-columns:1fr; } .stat { display:flex; align-items:center; justify-content:space-between; } }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="StudyFlow 个人学习进度管理"><title>StudyFlow · 学习管理</title>
+<style>
+:root{--ink:#182238;--muted:#69758b;--line:#e5e9f1;--bg:#f6f8fc;--card:#fff;--primary:#6474f5;--danger:#d94b63;--shadow:0 14px 35px #26365d12}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}button,input{font:inherit}button{cursor:pointer}.shell{max-width:1120px;margin:auto;padding:34px 22px 56px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}.brand{display:flex;align-items:center;gap:13px}.mark{display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:linear-gradient(135deg,#6475f5,#8b79f2);color:#fff;font-size:20px;font-weight:800;box-shadow:0 8px 18px #6475f540}h1,h2,p{margin:0}h1{font-size:24px;letter-spacing:-.03em}.sub{margin-top:3px;color:var(--muted);font-size:13px}.view[hidden]{display:none!important}.home-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.home-head h2{font-size:22px}.home-head p{margin-top:4px;color:var(--muted)}.primary{border:0;border-radius:10px;background:var(--primary);color:#fff;padding:10px 15px;font-weight:700}.primary:hover{filter:brightness(.95)}.project-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}.project-card,.detail-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.project-card{position:relative;padding:20px;transition:transform .18s,box-shadow .18s}.project-card:hover{transform:translateY(-2px);box-shadow:0 18px 40px #26365d18}.card-top{display:flex;justify-content:space-between;gap:10px}.project-card h3{font-size:17px}.project-card .meta{margin-top:3px;color:var(--muted);font-size:12px}.theme-dot{width:12px;height:12px;border-radius:50%;background:var(--project-color);flex:none;margin-top:5px}.segments{display:grid;grid-template-columns:repeat(var(--segment-count),minmax(0,1fr));gap:3px;margin-top:17px}.segment{height:12px;min-width:2px;border-radius:4px;background:#edf0f4}.segment.done{background:var(--project-color)}.segment-legend{display:flex;justify-content:space-between;margin-top:9px;color:var(--muted);font-size:12px}.empty{padding:50px;text-align:center;background:var(--card);border:1px dashed #cfd5e2;border-radius:18px;color:var(--muted)}.detail-card{padding:24px}.detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.back{border:0;background:transparent;color:var(--primary);padding:6px 0;font-weight:700}.detail-title{display:flex;align-items:center;gap:9px}.detail-title h2{font-size:24px}.detail-meta{margin-top:5px;color:var(--muted)}.detail-actions{display:flex;gap:9px;align-items:center}.color-label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px}.color-input{width:34px;height:30px;border:1px solid var(--line);border-radius:7px;padding:2px;background:#fff}.danger{border:0;border-radius:9px;padding:8px 11px;background:#fff0f3;color:var(--danger);font-size:13px}.grid-title{display:flex;justify-content:space-between;align-items:center;margin:25px 0 14px}.grid-title h3{font-size:16px}.grid-title span{color:var(--muted);font-size:12px}.page-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}.page-cell{aspect-ratio:1;border:1px solid #e1e6ee;border-radius:8px;background:#eef1f5;color:#778196;font-weight:650;transition:.15s}.page-cell:hover{transform:translateY(-2px);box-shadow:0 5px 12px #26365d1a}.page-cell.done{border-color:var(--project-color);background:var(--project-color);color:#fff}.modal{width:min(420px,calc(100% - 30px));padding:24px;border:0;border-radius:17px;color:var(--ink);box-shadow:0 24px 70px #141d373d}.modal::backdrop{background:#131c3370}.modal h2{font-size:19px}.modal p{margin-top:6px;color:var(--muted);font-size:13px}.field{margin-top:17px}.field label{display:block;margin-bottom:6px;font-size:13px;font-weight:700}.field input:not([type=color]){width:100%;padding:10px 11px;border:1px solid #d8deea;border-radius:9px;outline:0}.field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px #6475f522}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}.cancel{border:0;border-radius:9px;padding:10px 15px;background:#eef1f5;color:var(--muted)}@media(max-width:650px){.shell{padding:22px 14px 40px}.top{margin-bottom:21px}.home-head{align-items:flex-start;gap:12px;flex-direction:column}.home-head h2{font-size:20px}.project-cards{grid-template-columns:1fr}.detail-card{padding:18px 15px}.detail-head{display:block}.detail-actions{margin-top:14px;justify-content:space-between}.detail-title h2{font-size:21px}.page-grid{gap:5px}.page-cell{border-radius:6px;font-size:11px}.segments{gap:2px}}
+</style>
 </head>
-<body>
-  <main class="app-shell">
-    <header class="topbar">
-      <div class="brand"><div class="brand-mark" aria-hidden="true">S</div><div><h1>StudyFlow</h1><p class="subtitle">让每一次努力，都看得见。</p></div></div>
-    </header>
-    <div class="layout">
-      <aside class="card projects-card" aria-label="学习项目列表">
-        <div class="section-heading"><h2>我的学习项目</h2><span class="count" id="projectCount">0 个</span></div>
-        <div class="project-list" id="projectList"></div>
-        <button class="add-button" id="openAddButton" type="button">＋ 新增学习项目</button>
-      </aside>
-      <section class="content" aria-live="polite">
-        <div class="card hero-card" id="projectOverview"></div>
-        <div class="card grid-card"><div class="grid-header"><h2>页面进度</h2><span class="grid-help">点击格子切换完成状态</span></div><div class="page-grid" id="pageGrid"></div></div>
-      </section>
-    </div>
-  </main>
-
-  <dialog id="addDialog"><form class="modal" id="addForm" method="dialog"><h2>新增学习项目</h2><p>设置项目名称和需要完成的任务数量。</p><div class="form-row"><label for="projectName">项目名称</label><input id="projectName" name="projectName" required maxlength="40" placeholder="例如：英语单词" /></div><div class="form-row"><label for="taskTotal">总任务数量</label><input id="taskTotal" name="taskTotal" required type="number" min="1" max="1000" value="100" /></div><div class="modal-actions"><button class="cancel-button" id="cancelAddButton" type="button">取消</button><button class="primary-button" type="submit">创建项目</button></div></form></dialog>
-  <script>
-    const STORAGE_KEY = 'studyflow-projects-v1';
-    const projectList = document.getElementById('projectList');
-    const projectCount = document.getElementById('projectCount');
-    const projectOverview = document.getElementById('projectOverview');
-    const pageGrid = document.getElementById('pageGrid');
-    const addDialog = document.getElementById('addDialog');
-    const addForm = document.getElementById('addForm');
-    const projectNameInput = document.getElementById('projectName');
-    const taskTotalInput = document.getElementById('taskTotal');
-    let projects = loadProjects();
-    let activeId = projects[0].id;
-
-    function createProject(name, total) { return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), name, total, completed: [] }; }
-    function loadProjects() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (Array.isArray(saved) && saved.length) return saved.map(item => ({ ...item, completed: Array.isArray(item.completed) ? item.completed : [] }));
-      } catch (error) { console.warn('无法读取本地学习记录', error); }
-      const initial = createProject('C++ 练习册', 100); localStorage.setItem(STORAGE_KEY, JSON.stringify([initial])); return [initial];
-    }
-    function saveProjects() { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); }
-    function getActiveProject() { return projects.find(project => project.id === activeId) || projects[0]; }
-    function render() {
-      const active = getActiveProject(); if (!active) return;
-      active.completed = active.completed.filter(page => page >= 1 && page <= active.total);
-      const completedCount = active.completed.length; const percent = active.total ? Math.round(completedCount / active.total * 100) : 0;
-      projectCount.textContent = `${projects.length} 个`;
-      projectList.innerHTML = projects.map(project => `<button class="project-item${project.id === active.id ? ' active' : ''}" type="button" data-project-id="${project.id}"><span class="project-name">${escapeHtml(project.name)}</span><span class="project-pages">${project.completed.length}/${project.total}</span></button>`).join('');
-      projectOverview.innerHTML = `<div class="project-header"><div><div class="eyebrow">当前学习项目</div><h2 class="project-title">${escapeHtml(active.name)}</h2><p class="project-subtitle">坚持完成每一页，稳步积累你的学习成果。</p></div><button class="delete-button" id="deleteButton" type="button">删除项目</button></div><div class="stats"><div class="stat"><div class="stat-label">已完成</div><div class="stat-value">${completedCount}<small> / ${active.total}</small></div></div><div class="stat"><div class="stat-label">剩余任务</div><div class="stat-value">${active.total - completedCount}</div></div><div class="stat"><div class="stat-label">完成率</div><div class="stat-value">${percent}<small>%</small></div></div></div><div class="progress-wrap"><div class="progress-label"><span>整体进度</span><strong>${percent}%</strong></div><div class="progress-track" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100" aria-label="${escapeHtml(active.name)}完成进度"><div class="progress-fill" style="width:${percent}%"></div></div></div>`;
-      pageGrid.innerHTML = Array.from({ length: active.total }, (_, index) => { const page = index + 1; const done = active.completed.includes(page); return `<button class="page-cell${done ? ' done' : ''}" type="button" data-page="${page}" aria-label="第 ${page} 页，${done ? '已完成' : '未完成'}" aria-pressed="${done}">${page}</button>`; }).join('');
-      saveProjects();
-    }
-    function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[character]); }
-    projectList.addEventListener('click', event => { const item = event.target.closest('[data-project-id]'); if (!item) return; activeId = item.dataset.projectId; render(); });
-    pageGrid.addEventListener('click', event => { const cell = event.target.closest('[data-page]'); if (!cell) return; const active = getActiveProject(); const page = Number(cell.dataset.page); const index = active.completed.indexOf(page); if (index >= 0) active.completed.splice(index, 1); else active.completed.push(page); active.completed.sort((a, b) => a - b); render(); });
-    projectOverview.addEventListener('click', event => { if (event.target.id !== 'deleteButton') return; const active = getActiveProject(); if (projects.length === 1) { alert('至少保留一个学习项目，暂时不能删除。'); return; } if (!confirm(`确定要删除“${active.name}”吗？此项目的完成记录也会被删除。`)) return; projects = projects.filter(project => project.id !== active.id); activeId = projects[0].id; saveProjects(); render(); });
-    document.getElementById('openAddButton').addEventListener('click', () => { addForm.reset(); taskTotalInput.value = 100; addDialog.showModal(); projectNameInput.focus(); });
-    document.getElementById('cancelAddButton').addEventListener('click', () => addDialog.close());
-    addForm.addEventListener('submit', event => { event.preventDefault(); const name = projectNameInput.value.trim(); const total = Number(taskTotalInput.value); if (!name || !Number.isInteger(total) || total < 1 || total > 1000) return; const project = createProject(name, total); projects.push(project); activeId = project.id; saveProjects(); render(); addDialog.close(); });
-    render();
-  </script>
-</body>
-</html>
+<body><main class="shell"><header class="top"><div class="brand"><div class="mark" aria-hidden="true">S</div><div><h1>StudyFlow</h1><p class="sub">让每一次努力，都看得见。</p></div></div><button class="primary" id="headerAdd" type="button">＋ 新增项目</button></header>
+<section id="homeView" class="view"><div class="home-head"><div><h2>我的学习项目</h2><p>每一格都代表真实的一页，按自己的节奏前进。</p></div></div><div id="projectCards" class="project-cards"></div></section>
+<section id="detailView" class="view" hidden><div class="detail-card" id="detailContent"></div></section></main>
+<dialog id="addDialog" class="modal"><form id="addForm" method="dialog"><h2>新增学习项目</h2><p>设置项目名称、总页数和主题颜色。</p><div class="field"><label for="nameInput">项目名称</label><input id="nameInput" maxlength="40" required placeholder="例如：英语单词"/></div><div class="field"><label for="totalInput">总页数</label><input id="totalInput" type="number" min="1" max="1000" value="100" required/></div><div class="field"><label for="themeInput">主题颜色</label><input id="themeInput" class="color-input" type="color" value="#6474f5"/></div><div class="modal-actions"><button class="cancel" id="cancelAdd" type="button">取消</button><button class="primary" type="submit">创建项目</button></div></form></dialog>
+<script>
+const STORAGE_KEY='studyflow-projects-v1';
+const DEFAULT_THEME='#6474f5';
+const homeView=document.getElementById('homeView'),detailView=document.getElementById('detailView'),cards=document.getElementById('projectCards'),detail=document.getElementById('detailContent'),dialog=document.getElementById('addDialog'),form=document.getElementById('addForm'),nameInput=document.getElementById('nameInput'),totalInput=document.getElementById('totalInput'),themeInput=document.getElementById('themeInput');
+let projects=loadProjects(), activeId=null;
+function makeProject(name,total,theme=DEFAULT_THEME){return{id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name,total,completed:[],theme};}
+function safeTheme(value){return /^#[0-9a-fA-F]{6}$/.test(value)?value:DEFAULT_THEME}
+function loadProjects(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));if(Array.isArray(saved)&&saved.length)return saved.map(p=>({...p,total:Number.isInteger(p.total)&&p.total>0?p.total:1,completed:Array.isArray(p.completed)?[...new Set(p.completed.filter(n=>Number.isInteger(n)&&n>0))].sort((a,b)=>a-b):[],theme:safeTheme(p.theme)}));}catch(error){console.warn('无法读取学习记录',error)}const initial=makeProject('C++ 练习册',100);localStorage.setItem(STORAGE_KEY,JSON.stringify([initial]));return[initial]}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(projects))}function esc(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}function percent(p){return p.total?Math.round(p.completed.length/p.total*100):0}function segments(p){return Array.from({length:p.total},(_,i)=>{const page=i+1;return`<span class="segment${p.completed.includes(page)?' done':''}" title="第 ${page} 页${p.completed.includes(page)?'（已完成）':'（未完成）'}"></span>`}).join('')}
+function renderHome(){homeView.hidden=false;detailView.hidden=true;if(!projects.length){cards.innerHTML='<div class="empty">还没有学习项目，点击右上角开始创建。</div>';return}cards.innerHTML=projects.map(p=>`<button class="project-card" type="button" data-open="${p.id}" style="--project-color:${esc(p.theme)}"><span class="card-top"><span><h3>${esc(p.name)}</h3><span class="meta">已完成 ${p.completed.length} / ${p.total} 页 · ${percent(p)}%</span></span><span class="theme-dot" aria-label="主题颜色"></span></span><span class="segments" style="--segment-count:${Math.min(p.total,100)}">${segments(p)}</span><span class="segment-legend"><span>逐页进度</span><span>${p.completed.length === p.total ? '全部完成' : '继续学习'}</span></span></button>`).join('')}
+function renderDetail(){const p=projects.find(x=>x.id===activeId);if(!p){renderHome();return}homeView.hidden=true;detailView.hidden=false;detail.innerHTML=`<div class="detail-head"><div><button class="back" id="backHome" type="button">← 返回首页</button><div class="detail-title"><span class="theme-dot" style="--project-color:${esc(p.theme)}"></span><h2>${esc(p.name)}</h2></div><p class="detail-meta">已完成 ${p.completed.length} / ${p.total} 页 · 完成率 ${percent(p)}%</p></div><div class="detail-actions"><label class="color-label">主题色 <input class="color-input" id="detailTheme" type="color" value="${esc(p.theme)}"/></label><button class="danger" id="deleteProject" type="button">删除项目</button></div></div><div class="grid-title"><h3>全部页数</h3><span>点击格子切换完成状态</span></div><div class="page-grid" style="--project-color:${esc(p.theme)}">${Array.from({length:p.total},(_,i)=>{const page=i+1,done=p.completed.includes(page);return`<button class="page-cell${done?' done':''}" type="button" data-page="${page}" aria-label="第 ${page} 页，${done?'已完成':'未完成'}" aria-pressed="${done}">${page}</button>`}).join('')}</div>`}
+function render(){save();activeId?renderDetail():renderHome()}
+cards.addEventListener('click',e=>{const card=e.target.closest('[data-open]');if(card){activeId=card.dataset.open;render()}});detail.addEventListener('click',e=>{if(e.target.id==='backHome'){activeId=null;render()}if(e.target.id==='deleteProject'){const p=projects.find(x=>x.id===activeId);if(projects.length===1){alert('至少保留一个学习项目，暂时不能删除。');return}if(confirm(`确定要删除“${p.name}”吗？此项目的完成记录也会被删除。`)){projects=projects.filter(x=>x.id!==activeId);activeId=null;render()}}if(e.target.closest('[data-page]')){const page=Number(e.target.closest('[data-page]').dataset.page),p=projects.find(x=>x.id===activeId),i=p.completed.indexOf(page);i>=0?p.completed.splice(i,1):p.completed.push(page);p.completed.sort((a,b)=>a-b);render()}});detail.addEventListener('change',e=>{if(e.target.id==='detailTheme'){const p=projects.find(x=>x.id===activeId);p.theme=e.target.value;render()}});document.getElementById('headerAdd').addEventListener('click',()=>{form.reset();totalInput.value=100;themeInput.value=DEFAULT_THEME;dialog.showModal();nameInput.focus()});document.getElementById('cancelAdd').addEventListener('click',()=>dialog.close());form.addEventListener('submit',e=>{e.preventDefault();const name=nameInput.value.trim(),total=Number(totalInput.value);if(!name||!Number.isInteger(total)||total<1||total>1000)return;const p=makeProject(name,total,themeInput.value);projects.push(p);activeId=p.id;render();dialog.close()});render();
+</script></body></html>
